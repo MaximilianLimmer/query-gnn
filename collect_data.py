@@ -8,7 +8,8 @@ import time
 def get_connection():
     return psycopg2.connect(
         dbname="dvdrental",
-        user="postgres_user",   # Changed from 'postgres'  # Added the password
+        user="postgres_user",
+        password="password",# Changed from 'postgres'  # Added the password
         host="127.0.0.1"
     )
 def get_random_deep_sql():
