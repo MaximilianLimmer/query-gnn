@@ -42,7 +42,7 @@ def get_random_deep_sql():
 
     # --- THE READ PATH ---
     # Only if we aren't writing do we start the expensive join-building process.
-    depth = random.randint(3, 4)
+    depth = random.randint(2, 4)
     start_table = random.choice(list(schema.keys()))
     used_tables = [start_table]
 
@@ -91,9 +91,6 @@ def collect(size):
         print(f"🚀 Starting collection of {size} queries...")
 
         for i in range(1, size + 1):
-            if i % 100 == 0:
-                print("Taking a 5-second breath to let the CPU cool...")
-                time.sleep(5)
             sql = get_random_deep_sql()
             query_runtimes = []
             query_plans = []
