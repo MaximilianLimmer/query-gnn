@@ -6,74 +6,84 @@ import time
 
 
 def get_connection():
-    return psycopg2.connect(
-        dbname="dvdrental",
-        user="postgres_user",
-        password="password",# Changed from 'postgres'  # Added the password
-        host="127.0.0.1"
-    )
+    return psycopg2.connect(dbname="dvdrental", user="postgres", host="127.0.0.1")
+
 def get_random_deep_sql():
-    # COMPLETE DVD-Rental Schema Map
-    schema = {
-        "film": {"inventory": "film_id", "film_category": "film_id", "film_actor": "film_id"},
-        "film_actor": {"film": "film_id", "actor": "actor_id"},
-        "actor": {"film_actor": "actor_id"},
-        "film_category": {"film": "film_id", "category": "category_id"},
-        "category": {"film_category": "category_id"},
-        "inventory": {"film": "film_id", "rental": "inventory_id", "store": "store_id"},
-        "rental": {"inventory": "inventory_id", "customer": "customer_id", "payment": "rental_id", "staff": "staff_id"},
-        "customer": {"rental": "customer_id", "payment": "customer_id", "address": "address_id"},
-        "payment": {"rental": "rental_id", "customer": "customer_id", "staff": "staff_id"},
-        "address": {"customer": "address_id", "city": "city_id", "staff": "address_id", "store": "address_id"},
-        "city": {"address": "city_id", "country": "country_id"},
-        "country": {"city": "country_id"},
-        "store": {"staff": "manager_staff_id", "inventory": "store_id", "address": "address_id"},
-        "staff": {"store": "store_id", "payment": "staff_id", "rental": "staff_id", "address": "address_id"}
+    # 1. Full Schema Map based on real Database Relationships
+    # This prevents "Cross-Joins" that would freeze your collection.
+    full_schema = {
+        "actor": ["film_actor"],
+        "film_actor": ["actor", "film"],
+        "film": ["film_actor", "film_category", "inventory"],
+        "film_category": ["film", "category"],
+        "category": ["film_category"],
+        "inventory": ["film", "store", "rental"],
+        "store": ["inventory", "staff", "address"],
+        "staff": ["store", "address", "rental", "payment"],
+        "address": ["store", "staff", "customer", "city"],
+        "city": ["address", "country"],
+        "country": ["city"],
+        "customer": ["address", "rental", "payment"],
+        "rental": ["inventory", "customer", "staff", "payment"],
+        "payment": ["customer", "staff", "rental"]
     }
 
-    if random.random() < 0.15:
-        # --- THE WRITE PATH ---
-        target = random.choice(["film", "payment", "actor", "customer"])
-        random_id = random.randint(1, 1000)
-        if random.random() > 0.5:
-            return f"UPDATE {target} SET last_update = NOW() WHERE {target}_id < {random_id}"
-        else:
-            return f"DELETE FROM {target} WHERE {target}_id > {random_id}"
+    # Map of which key to use when joining two specific tables
+    join_keys = {
+        "actor": "actor_id", "film_actor": "actor_id",
+        "film": "film_id", "film_category": "film_id", "inventory": "film_id",
+        "category": "category_id",
+        "rental": "inventory_id", # inventory join
+        "store": "store_id",
+        "staff": "staff_id",
+        "address": "address_id",
+        "city": "city_id",
+        "country": "country_id",
+        "customer": "customer_id",
+        "payment": "rental_id"
+    }
 
-    # --- THE READ PATH ---
-    # Only if we aren't writing do we start the expensive join-building process.
-    depth = random.randint(2, 4)
-    start_table = random.choice(list(schema.keys()))
+    # 2. Complexity Control
+    # Depth 1-4 covers simple lookups to deep analytical joins
+    depth = random.randint(1, 4)
+    start_table = random.choice(list(full_schema.keys()))
     used_tables = [start_table]
 
-    # Decide if we are aggregating or just selecting
-    is_agg = random.random() < 0.3
-    query = f"SELECT count(*), avg(random()) " if is_agg else "SELECT * "
-    query += f"FROM {start_table}"
+    # Use column list or *; USING helps handle duplicate join columns
+    query = f"SELECT * FROM {start_table}"
 
-    # Join Path (Chain vs Star)
-    mode = random.choice(["chain", "star"])
-    for _ in range(depth - 1):
-        search_tables = [used_tables[-1]] if mode == "chain" else used_tables
-        available_joins = []
-        for t in search_tables:
-            for neighbor, key in schema[t].items():
-                if neighbor not in used_tables:
-                    available_joins.append((t, neighbor, key))
+    for _ in range(depth):
+        current = used_tables[-1]
+        # Find neighbors not already in the query
+        options = [t for t in full_schema[current] if t not in used_tables]
+        if not options: break
 
-        if not available_joins: break
-        parent, next_t, key = random.choice(available_joins)
-        query += f" JOIN {next_t} ON {parent}.{key} = {next_t}.{key}"
+        next_t = random.choice(options)
+
+        # Determine the correct join key
+        # If joining film_actor and film, we use film_id
+        if next_t in ["film", "film_actor", "film_category", "inventory"]:
+            key = "film_id"
+        elif next_t in ["actor", "film_actor"]:
+            key = "actor_id"
+        elif next_t in ["city", "address"]:
+            key = "city_id"
+        elif next_t in ["country", "city"]:
+            key = "country_id"
+        else:
+            # Fallback to standard naming: table_id
+            key = join_keys.get(next_t, f"{next_t}_id")
+
+        query += f" JOIN {next_t} USING ({key})"
         used_tables.append(next_t)
 
-    if is_agg:
-        query += f" GROUP BY {start_table}.{start_table}_id"
+    # 3. Add a "Noise" Filter
+    # This randomizes the number of rows Postgres has to process,
+    # giving your GNN different 'costs' to learn from.
+    if random.random() < 0.5:
+        query += f" WHERE random() < {random.uniform(0.1, 0.9)}"
 
-    if random.random() < 0.20:
-        order_table = random.choice(used_tables)
-        query += f" ORDER BY {order_table}.{order_table}_id DESC"
-
-    query += f" LIMIT {random.randint(5, 5000)}"
+    query += f" LIMIT {random.randint(10, 1000)}"
     return query
 
 
@@ -91,6 +101,7 @@ def collect(size):
         print(f"🚀 Starting collection of {size} queries...")
 
         for i in range(1, size + 1):
+
             sql = get_random_deep_sql()
             query_runtimes = []
             query_plans = []
@@ -141,4 +152,4 @@ def collect(size):
         print(f"Connection Error: {e}")
 
 if __name__ == "__main__":
-    collect(10000)
+    collect(20000)
