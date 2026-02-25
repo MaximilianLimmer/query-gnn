@@ -1,0 +1,21 @@
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE files
+.idea/
+*.iml
+
+# Data and Outputs (Don't push the heavy stuff!)
+*.json
+*.csv
+*.png
+*.pth
+*.md
+!README.md
