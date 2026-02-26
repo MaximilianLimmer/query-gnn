@@ -17,3 +17,14 @@ After training on 20,000 PostgreSQL plans, the model achieved state-of-the-art a
 <p align="center">
   <img src="gnn_report_plots.png" width="1000" title="Predicted vs Actual Runtime">
 </p>
+
+### Data Generation & Pipeline
+* **Query Generation:** A recursive generator produced **20,000 unique queries**, from simple filters to 5-way joins.
+* **Ground Truth:** Each query was executed via `EXPLAIN ANALYZE`. To minimize system noise, the **median of 3 runs** was used as the target label.
+* **Preprocessing:** Plans were transformed into directed graphs with 27 features per node (Operators, Row Counts, Widths, and Costs).
+
+### Model Health Report
+
+<p align="center">
+  <img src="dataset_health_visuals.png" width="1000" title="Model Health Report">
+</p>
