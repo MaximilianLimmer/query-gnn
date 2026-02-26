@@ -41,3 +41,12 @@ After training on 20,000 PostgreSQL plans, the model achieved state-of-the-art a
 <p align="center">
   <img src="dataset_health_visuals.png" width="1000" title="Model Health Report">
 </p>
+
+
+### Pipeline Execution
+The project is orchestrated via `main.py`, supporting end-to-end data collection and training.
+
+#### 1. End-to-End Pipeline
+To collect 20,000 queries and train for 300 epochs:
+```bash
+python main.py --collect --train --size 20000 --epochs 300
