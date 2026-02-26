@@ -7,7 +7,7 @@ Traditional database optimizers use static cost models that often fail to captur
 To move beyond simple regression, I designed a **Hybrid Graph Attention Network (GNN)** that treats the SQL execution plan as a directed acyclic graph (DAG). 
 
 #### 1. Structural Path (GATv2 Layers)
-The model utilizes two layers of **GATv2 (Graph Attention Networks)**. Unlike standard GNNs, GATv2 allows nodes to dynamically "attend" to their children, helping the model identify which sub-plans (e.g., a specific `Nested Loop Join` or a large `Seq Scan`) are the true performance bottlenecks.
+The model utilizes two layers of **GATv2 (Graph Attention Networks)**. Unlike standard GNNs, GATv2 allows nodes to dynamically "attend" to their children.
 * **Feature Masking & Encoding:** To prevent "Label Leakage," the optimizer's internal `Total Cost` is stripped from the 27-dimensional node features before entering the GNN. This forces the network to learn the execution complexity based purely on operator types (**21-way One-Hot encoding**) and structural data widths.
 
 
@@ -66,15 +66,6 @@ To collect 20,000 queries and train for 300 epochs:
 python main.py --collect --train --size 20000 --epochs 300
 ```
 
-
-### Inference & Prediction
-Once the model is trained and the weights (`query_gnn.pth`) and scaler (`scaler.pkl`) are generated, you can use the standalone prediction script to evaluate any PostgreSQL execution plan in JSON format.
-
-#### Running a Prediction
-Pass the path to a JSON plan file as a command-line argument:
-```bash
-python predict.py examples/medium_plan.json
-```
 
 ### Quick Start: Inference & Prediction
 The repository includes a pre-trained model (**`query_gnn.pth`**) and the necessary feature scaling parameters (**`scaler.pkl`**). You can test the GNN immediately on the provided execution plans without running the full training pipeline.
