@@ -15,5 +15,5 @@ After training on 20,000 PostgreSQL plans, the model achieved state-of-the-art a
 * **90th Percentile Q:** 1.61
 
 <p align="center">
-  <img src="gnn_report_plots.png" width="600" title="Predicted vs Actual Runtime">
+  <img src="gnn_report_plots.png" width="1000" title="Predicted vs Actual Runtime">
 </p>
