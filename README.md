@@ -3,7 +3,7 @@
 ### The Goal
 Traditional database optimizers use static cost models that often fail to capture the non-linear complexities of modern analytical queries. The goal of this project is to build a **Learned Cost Estimator** that treats SQL execution plans as recursive data structures, providing highly accurate, real-world runtime predictions in milliseconds.
 
-###Model Architecture: Hybrid GATv2 with Residual Cost Injection
+### Model Architecture: Hybrid GATv2 with Residual Cost Injection
 To move beyond simple regression, I designed a **Hybrid Graph Attention Network (GNN)** that treats the SQL execution plan as a directed acyclic graph (DAG). 
 
 #### 1. Structural Path (GATv2 Layers)
