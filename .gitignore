@@ -26,6 +26,7 @@ __pycache__/
 !scaler.pkl
 !examples/*.json
 !gnn_report_plots.png
+!dataset_health_visuals.png
 
 # Keep the README
 !README.md
