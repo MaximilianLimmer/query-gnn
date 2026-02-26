@@ -3,7 +3,7 @@ import numpy as np
 from torch_geometric.data import Data
 from sklearn.preprocessing import StandardScaler
 
-OP_LIST = [
+OP_LIST = [ 
     "Seq Scan", "Hash Join", "Index Scan", "Hash", "Materialize",
     "Nested Loop", "ModifyTable", "Sort", "Merge Join", "Index Only Scan",
     "Aggregate", "GroupAggregate", "HashAggregate", "Limit", "Append",

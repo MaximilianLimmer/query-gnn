@@ -1,5 +1,6 @@
 # Virtual Environment
 .venv/
+# Virtual Environments
 venv/
 ENV/
 
@@ -10,12 +11,21 @@ __pycache__/
 
 # IDE files
 .idea/
+.vscode/
 *.iml
 
-# Data and Outputs (Don't push the heavy stuff!)
+# --- Data and Outputs ---
+# Block all JSON and PTH by default to prevent accidental heavy uploads
 *.json
+*.pth
 *.csv
 *.png
-*.pth
-*.md
+
+# EXCEPT for these specific files which are required for the project to work:
+!query_gnn.pth
+!scaler.pkl
+!examples/*.json
+!gnn_report_plots.png
+
+# Keep the README
 !README.md

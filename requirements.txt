@@ -1,18 +1,12 @@
-# Machine Learning & GNN
+joblib
 torch>=2.0.0
 torch-geometric>=2.4.0
-
-# Data Science & Statistics
 numpy
 pandas
 scipy
 scikit-learn
-
-# Visualization
 matplotlib
 seaborn
-
-# Database & Utilities
 psycopg2-binary
 tabulate
 tqdm

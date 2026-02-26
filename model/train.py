@@ -2,6 +2,7 @@ import json
 import random
 import torch
 import numpy as np
+import joblib
 from torch_geometric.loader import DataLoader
 
 from model.evaluate import run_full_analysis
@@ -28,6 +29,7 @@ def run_training_pipeline(epochs=300, data_path="query_data.json"):
         raw_data = json.load(f)
 
     dataset, target_scaler = get_prepared_data(raw_data)
+    joblib.dump(target_scaler, "scaler.pkl")
     random.shuffle(dataset)
 
     split = int(0.8 * len(dataset))

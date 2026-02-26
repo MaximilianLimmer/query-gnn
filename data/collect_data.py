@@ -100,7 +100,7 @@ def collect_dataset(size=20000, output_file="query_data.json"):
                 for _ in range(3):
                     cur.execute("BEGIN;")
                     # EXPLAIN ANALYZE gives us the real ground-truth time
-                    cur.execute(f"EXPLAIN (FORMAT JSON, ANALYZE, BUFFERS) {sql}")
+                    cur.execute(f"EXPLAIN (FORMAT JSON, ANALYZE, VERBOSE, BUFFERS) {sql}")
                     raw_plan = cur.fetchone()[0][0]['Plan']
                     runtimes.append(raw_plan['Actual Total Time'])
                     plans.append(raw_plan)
