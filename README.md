@@ -42,11 +42,46 @@ After training on 20,000 PostgreSQL plans, the model achieved state-of-the-art a
   <img src="dataset_health_visuals.png" width="1000" title="Model Health Report">
 </p>
 
+#### 1. System Requirements
+* **Database:** PostgreSQL 12 or higher.
+* **Dataset:** The [PostgreSQL Sample DVD Rental Database](https://www.postgresqltutorial.com/postgresql-getting-started/postgresql-sample-database/) must be loaded into your instance.
+* **Python:** version 3.8 or higher.
+
+### 2. Python Requirements
+All necessary libraries, including **PyTorch Geometric** and **Scikit-Learn**, are listed in the `requirements.txt`. 
+
+To set up your environment:
+```bash
+pip install -r requirements.txt
+```
+
 
 ### Pipeline Execution
 The project is orchestrated via `main.py`, supporting end-to-end data collection and training.
 
 #### 1. End-to-End Pipeline
 To collect 20,000 queries and train for 300 epochs:
+
 ```bash
 python main.py --collect --train --size 20000 --epochs 300
+```
+
+
+### Inference & Prediction
+Once the model is trained and the weights (`query_gnn.pth`) and scaler (`scaler.pkl`) are generated, you can use the standalone prediction script to evaluate any PostgreSQL execution plan in JSON format.
+
+#### Running a Prediction
+Pass the path to a JSON plan file as a command-line argument:
+```bash
+python predict.py examples/medium_plan.json
+```
+
+### Quick Start: Inference & Prediction
+The repository includes a pre-trained model (**`query_gnn.pth`**) and the necessary feature scaling parameters (**`scaler.pkl`**). You can test the GNN immediately on the provided execution plans without running the full training pipeline.
+
+#### Running a Prediction
+To evaluate one of the provided sample plans, run the following command:
+
+```bash
+python predict.py examples/medium_plan.json
+```
