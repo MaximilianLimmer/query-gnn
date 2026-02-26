@@ -3,10 +3,23 @@
 ### The Goal
 Traditional database optimizers use static cost models that often fail to capture the non-linear complexities of modern analytical queries. The goal of this project is to build a **Learned Cost Estimator** that treats SQL execution plans as recursive data structures, providing highly accurate, real-world runtime predictions in milliseconds.
 
-### The Model: GATv2 + Feature Masking
-To achieve this, I developed a **Hybrid Graph Attention Network (GNN)** using the GATv2 architecture. 
-* **Graph Representation:** SQL plans are transformed into directed graphs where nodes represent operators (e.g., `Hash Join`, `Index Scan`) and edges represent data flow.
-* **Leakage Prevention:** To ensure the model actually "understands" query structure, the optimizer's internal cost estimates are masked during the graph convolution phase and only re-introduced in the final MLP head.
+###Model Architecture: Hybrid GATv2 with Residual Cost Injection
+To move beyond simple regression, I designed a **Hybrid Graph Attention Network (GNN)** that treats the SQL execution plan as a directed acyclic graph (DAG). 
+
+#### 1. Structural Path (GATv2 Layers)
+The model utilizes two layers of **GATv2 (Graph Attention Networks)**. Unlike standard GNNs, GATv2 allows nodes to dynamically "attend" to their children, helping the model identify which sub-plans (e.g., a specific `Nested Loop Join` or a large `Seq Scan`) are the true performance bottlenecks.
+* **Feature Masking & Encoding:** To prevent "Label Leakage," the optimizer's internal `Total Cost` is stripped from the 27-dimensional node features before entering the GNN. This forces the network to learn the execution complexity based purely on operator types (**21-way One-Hot encoding**) and structural data widths.
+
+
+
+#### 2. Attentional Global Pooling
+Instead of simple mean pooling, I implemented **Attentional Aggregation**. This uses a trainable "gate" neural network to determine which nodes in the query tree are most significant to the final runtime. This allows the model to prioritize high-impact operators while ignoring trivial leaf nodes like `Limit` or `Result`.
+
+#### 3. Residual "Shortcut" Path
+The masked `Total Cost` is re-introduced as a **Residual Shortcut** at the final MLP head. 
+* **GNN Path:** Provides a structural "complexity score" derived from the plan's shape.
+* **Shortcut Path:** Provides the absolute magnitude of the data being processed.
+The final prediction is a fusion of these two paths, allowing the model to refine and correct the optimizer's original cost estimate using learned structural insights.
 
 ### 📈 Results at a Glance
 After training on 20,000 PostgreSQL plans, the model achieved state-of-the-art accuracy for a local schema:
