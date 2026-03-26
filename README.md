@@ -38,7 +38,7 @@ After training on **20,000 unique PostgreSQL plans**, the model achieved state-o
   <img src="dataset_health_visuals.png" width="1000" title="Model Health Report">
 </p>
 
-### 🛠️ Pipeline Execution
+### Pipeline Execution
 The project is orchestrated via `main.py`, supporting an end-to-end data collection and training workflow.
 
 ```bash
