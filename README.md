@@ -15,7 +15,7 @@ The masked `Total Cost` is re-introduced as a **Residual Shortcut** at the final
 * **Shortcut Path:** Provides the absolute magnitude of the data volume.
 The final prediction fuses these paths, allowing the model to refine and correct the optimizer's original cost estimate using learned structural insights.
 
-### 📈 Results & Data Integrity
+### Results & Data Integrity
 After training on **20,000 unique PostgreSQL plans**, the model achieved state-of-the-art accuracy for the local schema:
 * **R² Score:** 0.9658
 * **Median Q-Error:** 1.13
